@@ -17,7 +17,7 @@ def downsample_video(input_path, output_path):
         "bwdif=mode=send_field:deint=interlaced,"  # Deinterlace
         "nlmeans=s=1.0:r=3:p=3,"                 # Denoise (Ultralight preset equivalent)
         "unsharp=3:3:0.5,"                       # Sharpen (Ultralight preset)
-        "scale='if(gt(iw,ih),1920,-2)':'if(gt(ih,iw),1920,-2)',"        # Long edge 1920px
+        "scale='if(gt(iw,ih),1920,-2)':'if(gt(ih,iw),1920,-2)':flags=threads,"        # Long edge 1920px
         "setsar=1"                          # Ensure square pixels
         # f"subtitles={input_path}:si=0"    # Burn first subtitle track
     )
@@ -25,6 +25,8 @@ def downsample_video(input_path, output_path):
     # Construct FFmpeg command
     cmd = [
         "ffmpeg",
+        "-threads", "0",
+        "-filter_threads", "0",
         "-i", input_path,
         "-map", "0",                          # Include all streams
         "-map", "-0:s",                       # Exclude subtitle streams (burned in)
@@ -38,7 +40,7 @@ def downsample_video(input_path, output_path):
         "-crf", "19",                         # Constant Quality 19
         "-preset", "fast",                    # Encoder preset
         "-profile:v", "main10",               # 10-bit profile
-        "-x265-params", "level=auto",         # Auto level
+        "-x265-params", "level=auto", "pools=threads:frame-threads=0",        # Auto level and x265 multi-threading
         "-vf", vf_chain,                      # Apply filter chain
         "-c:a", "copy",                       # Audio passthru
         "-disposition:a", "default",          # Mark default audio track
