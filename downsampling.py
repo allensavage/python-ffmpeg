@@ -48,9 +48,14 @@ def downsample_video(input_path, output_path):
     ]
     
     try:
-        subprocess.run(cmd, check=True)
-        print(f"Successfully processed: {output_path}")
+        print(f"Processing: {input_path} → {output_path}")
+        result = subprocess.run(cmd, check=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        print(f"Completed: {output_path}")
+        return True, input_path
     except subprocess.CalledProcessError as e:
-        print(f"Error processing video: {e.stderr.decode() if e.stderr else str(e)}")
-    except FileNotFoundError:
-        print("FFmpeg not found. Please install FFmpeg and ensure it's in your PATH.")
+        error_msg = e.stderr.decode() if e.stderr else str(e)
+        print(f"Error processing {input_path}: {error_msg}")
+        return False, input_path
+    except Exception as e:
+        print(f"Unexpected error with {input_path}: {str(e)}")
+        return False, input_path
