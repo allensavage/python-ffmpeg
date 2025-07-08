@@ -17,7 +17,7 @@ def downsample_video(input_path, output_path):
         "bwdif=mode=send_field:deint=interlaced,"  # Deinterlace
         "nlmeans=s=1.0:r=3:p=3,"                 # Denoise (Ultralight preset equivalent)
         "unsharp=3:3:0.5,"                       # Sharpen (Ultralight preset)
-        "scale='if(gt(iw,ih),1920,-2)':'if(gt(ih,iw),1920,-2)':flags=threads,"        # Long edge 1920px
+        "scale='if(gt(iw,ih),1920,-2)':'if(gt(ih,iw),1920,-2)',"        # Long edge 1920px
         "setsar=1"                          # Ensure square pixels
         # f"subtitles={input_path}:si=0"    # Burn first subtitle track
     )
@@ -34,7 +34,7 @@ def downsample_video(input_path, output_path):
         "-map_chapters", "0",                 # Include chapters
         "-movflags", "+faststart",            # Web optimization
         "-async", "1",                        # Align A/V start
-        "-vsync", "vfr",                      # Handle VFR (same as source peak)
+        "-fps_mode", "vfr",                      # Handle VFR (same as source peak)
         "-c:v", "libx265",                    # H.265 encoder
         "-pix_fmt", "yuv420p10le",            # 10-bit color
         "-crf", "19",                         # Constant Quality 19
