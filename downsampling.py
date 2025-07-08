@@ -40,7 +40,7 @@ def downsample_video(input_path, output_path):
         "-crf", "19",                         # Constant Quality 19
         "-preset", "fast",                    # Encoder preset
         "-profile:v", "main10",               # 10-bit profile
-        "-x265-params", "level=auto", "pools=threads:frame-threads=0",        # Auto level and x265 multi-threading
+        "-x265-params", "level=auto:pools=threads:frame-threads=0",        # Auto level and x265 multi-threading
         "-vf", vf_chain,                      # Apply filter chain
         "-c:a", "copy",                       # Audio passthru
         "-disposition:a", "default",          # Mark default audio track
