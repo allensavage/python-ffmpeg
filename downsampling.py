@@ -1,16 +1,16 @@
 import subprocess
 import shlex
 
-def downsample_video(input_path, output_path):
+def downsample_video(task: Tuple[Path, Path]) -> Tuple[bool, Path]:
     """
     Downsamples a video with HandBrake-like settings using FFmpeg.
     
     Args:
-        input_path (str): Path to input video file.
-        output_path (str): Path for output video file.
+        task: Tuple containing (input_path, output_path) as Path objects
+    Returns:
+        Tuple (success status, input_path)
     """
-    # # Escape input path for subtitle filter
-    # escaped_input_path = shlex.quote(input_path)
+    input_path, output_path = task
     
     # Construct filter chain
     vf_chain = (
