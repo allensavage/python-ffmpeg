@@ -1,5 +1,6 @@
 import subprocess
 from typing import Tuple
+from pathlib import Path
 import shlex
 
 def downsample_video(task: Tuple[Path, Path]) -> Tuple[bool, Path]:
