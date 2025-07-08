@@ -1,6 +1,6 @@
 import sys
-sys.path.append("/home/userroot/GitClone/python-ffmpeg")
-sys.path.append("/home/userroot/GitClone/own_function")
+sys.path.append("/home/allen-ubuntu-vm1/GitClone/python-ffmpeg")
+sys.path.append("/home/allen-ubuntu-vm1/GitClone/own_function")
 from own_function import target_file_path, target_file_path_with_level
 
 from downsampling import downsample_video
@@ -12,7 +12,7 @@ if __name__ == "__main__":
     source_ext = ".mp4"
     level = 1
 
-    input_directory = "/home/userroot/shizheng/photo"
+    input_directory = "/home/allen-ubuntu-vm1/photo"
     # sub_dir = "output"
     name_postfix = "_output"
 
