@@ -71,6 +71,8 @@ if __name__ == "__main__":
 
     max_depth = args.max_depth
 
+    args = parser.parse_args()
+
     # Collect input files
     input_files = []
 
