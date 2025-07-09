@@ -1,7 +1,7 @@
 import sys
 sys.path.append("/home/allen-ubuntu-vm1/GitClone/python-ffmpeg")
 sys.path.append("/home/allen-ubuntu-vm1/GitClone/own_function")
-from own_function import target_file_path, target_file_path_with_level
+from own_function import filter_files_by_extension, list_files_by_depth
 
 from downsampling import downsample_video
 from multi_process_videos import multi_process_videos
