@@ -76,24 +76,12 @@ if __name__ == "__main__":
     # Collect input files
     input_files = []
 
-    raw_input_files = list_files_by_depth(args.input, max_depth)
-
-    for path_str in raw_input_files:
-        path = Path(path_str)
-        if path.is_file():
-            input_files.extend(filter_files_by_extension(path, video_exts))
-        elif path.is_dir():
-            input_files.extend(filter_files_by_extension(path, video_exts))
-        else:
-            print(f"Warning: Path not found - {path}")
-
-    if not input_files:
-        print("No valid video files found. Exiting.")
-        exit(1)
+    for path in args.input:
+        files = list_files_by_depth(path, max_depth)
+        input_files = filter_files_by_extension(files, video_exts)
 
     output_dir = Path(args.output)
 
-    print(f"Found {len(input_files)} videos for processing")
     print(f"Using {args.workers} parallel workers")
 
     # Ensure output directory exists
