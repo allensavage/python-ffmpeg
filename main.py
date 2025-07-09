@@ -69,9 +69,9 @@ if __name__ == "__main__":
 
     video_exts = [".mp4", ".mov", ".mkv", ".avi", ".flv", ".m4v"]
 
-    max_depth = args.max_depth
-
     args = parser.parse_args()
+
+    max_depth = args.max_depth
 
     # Collect input files
     input_files = []
