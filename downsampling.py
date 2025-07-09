@@ -1,16 +1,18 @@
 import subprocess
+from typing import Tuple
+from pathlib import Path
 import shlex
 
-def downsample_video(input_path, output_path):
+def downsample_video(task: Tuple[Path, Path]) -> Tuple[bool, Path]:
     """
     Downsamples a video with HandBrake-like settings using FFmpeg.
     
     Args:
-        input_path (str): Path to input video file.
-        output_path (str): Path for output video file.
+        task: Tuple containing (input_path, output_path) as Path objects
+    Returns:
+        Tuple (success status, input_path)
     """
-    # # Escape input path for subtitle filter
-    # escaped_input_path = shlex.quote(input_path)
+    input_path, output_path = task
     
     # Construct filter chain
     vf_chain = (
@@ -48,9 +50,14 @@ def downsample_video(input_path, output_path):
     ]
     
     try:
-        subprocess.run(cmd, check=True)
-        print(f"Successfully processed: {output_path}")
+        print(f"Processing: {input_path} → {output_path}")
+        result = subprocess.run(cmd, check=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        print(f"Completed: {output_path}")
+        return True, input_path
     except subprocess.CalledProcessError as e:
-        print(f"Error processing video: {e.stderr.decode() if e.stderr else str(e)}")
-    except FileNotFoundError:
-        print("FFmpeg not found. Please install FFmpeg and ensure it's in your PATH.")
+        error_msg = e.stderr.decode() if e.stderr else str(e)
+        print(f"Error processing {input_path}: {error_msg}")
+        return False, input_path
+    except Exception as e:
+        print(f"Unexpected error with {input_path}: {str(e)}")
+        return False, input_path
