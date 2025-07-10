@@ -84,7 +84,7 @@ def main():
     output_dir = Path(args.output)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    num_workers = min(args.workers, len(input_files))
+    num_workers = min(args.workers, len(input_files), cpu_count())
     logger.log(f"Found {len(input_files)} videos for processing", "MAIN")
     logger.log(f"Using {num_workers} workers", "MAIN")
 
