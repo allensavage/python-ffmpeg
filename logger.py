@@ -7,7 +7,7 @@ class ConcurrentLogger:
     def __init__(self):
         self.lock = Lock()
 
-    def log(self, message: str, prefix: str = None):
+    def log(self, message: str, prefix: str = ""):
         """Thread-safe logging with optional prefix"""
         with self.lock:
             timestamp = datetime.now().strftime("%H:%M:%S")

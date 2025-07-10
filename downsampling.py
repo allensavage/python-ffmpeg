@@ -1,11 +1,8 @@
 import subprocess
-from multiprocessing import Lock
-import sys
-from typing import Tuple, Optional
+from typing import Tuple
 from pathlib import Path
-import shlex
-from datetime import datetime
 import time
+from .logger import logger  # Import the global logger
 
 
 def downsample_video(input_path: Path, output_path: Path) -> Tuple[bool, float]:
@@ -80,36 +77,32 @@ def downsample_video(input_path: Path, output_path: Path) -> Tuple[bool, float]:
 
     success = False
     try:
-        print_safe(f"Starting processing → {output_path.name}", prefix)
-
-        # Run FFmpeg and capture output in real-time
+        logger.log(f"Starting processing → {output_path.name}", prefix)
+        
+        # Run FFmpeg with real-time output capture
         with subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             bufsize=1,
             text=True,
-            encoding="utf-8",
-            errors="replace",
+            encoding='utf-8',
+            errors='replace'
         ) as proc:
-            # Capture and print output line by line
             for line in proc.stdout:
-                line = line.strip()
-                if line:
-                    print_safe(line, prefix)
-
-            # Check process completion
+                logger.log(line.strip(), prefix)
+            
             if proc.wait() == 0:
                 success = True
-                print_safe("Completed successfully", prefix)
+                logger.log("Completed successfully", prefix)
             else:
-                print_safe(f"Failed with exit code: {proc.returncode}", prefix)
-
+                logger.log(f"Failed with code {proc.returncode}", prefix)
+                
     except Exception as e:
-        print_safe(f"Unexpected error: {str(e)}", prefix)
-
+        logger.log(f"Unexpected error: {str(e)}", prefix)
+    
     finally:
         processing_time = time.time() - start_time
-        print_safe(f"Processing time: {processing_time:.1f}s", prefix)
-
-    return success, input_path, processing_time
+        logger.log(f"Processing time: {processing_time:.1f}s", prefix)
+        
+    return success, processing_time

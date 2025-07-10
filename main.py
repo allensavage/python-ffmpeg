@@ -1,6 +1,5 @@
 import sys
 
-sys.path.append("/home/userroot/GitClone/python-ffmpeg")
 sys.path.append("/home/userroot/GitClone/own_function")
 from .own_function import filter_files_by_extension, list_files_by_depth
 
@@ -25,28 +24,26 @@ def print_summary(
     min_time = min(processing_times) if processing_times else 0
     max_time = max(processing_times) if processing_times else 0
 
-    logger.log("\n" + "=" * 60, None)
-    logger.log("PROCESSING SUMMARY", None)
-    logger.log("=" * 60, None)
-    logger.log(f"Total Videos:      {total}", None)
-    logger.log(
-        f"Successful:        {success_count} ({success_count/total*100:.1f}%)", None
-    )
-    logger.log(f"Failed:            {len(failed_paths)}", None)
-    logger.log(f"Total Time:        {total_time:.1f} seconds", None)
-    logger.log(f"Avg Time/Video:    {avg_time:.1f} seconds", None)
-    logger.log(f"Fastest Video:     {min_time:.1f} seconds", None)
-    logger.log(f"Slowest Video:     {max_time:.1f} seconds", None)
+    logger.log("\n" + "=" * 60)
+    logger.log("PROCESSING SUMMARY")
+    logger.log("=" * 60)
+    logger.log(f"Total Videos:      {total}")
+    logger.log(f"Successful:        {success_count} ({success_count/total*100:.1f}%)")
+    logger.log(f"Failed:            {len(failed_paths)}")
+    logger.log(f"Total Time:        {total_time:.1f} seconds")
+    logger.log(f"Avg Time/Video:    {avg_time:.1f} seconds")
+    logger.log(f"Fastest Video:     {min_time:.1f} seconds")
+    logger.log(f"Slowest Video:     {max_time:.1f} seconds")
 
     if failed_paths:
-        logger.log("\nFAILED FILES:", None)
+        logger.log("\nFAILED FILES:")
         for path in failed_paths:
-            logger.log(f" - {path}", None)
+            logger.log(f" - {path}")
 
-    logger.log("\nPROCESSING TIMES:", None)
+    logger.log("\nPROCESSING TIMES:")
     for i, time_val in enumerate(sorted(processing_times, reverse=True)):
-        logger.log(f"{i+1:2d}. {time_val:6.1f}s", None)
-    logger.log("=" * 60, None)
+        logger.log(f"{i+1:2d}. {time_val:6.1f}s")
+    logger.log("=" * 60)
 
 
 def main():
