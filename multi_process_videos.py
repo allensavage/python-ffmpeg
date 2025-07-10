@@ -1,37 +1,63 @@
-from multiprocessing import Pool, cpu_count
+import time
+from multiprocessing import Pool
 from typing import Callable, List, Tuple
 from pathlib import Path
+from .logger import logger
+
 
 def multi_process_videos(
-    input_paths: List[Path], 
-    output_dir: Path, 
-    processing_func: Callable[[Tuple[Path, Path]], Tuple[bool, Path]],
-    num_workers: int = cpu_count()
-) -> Tuple[int, List[Path]]:
+    input_paths: List[Path],
+    output_dir: Path,
+    processing_func: Callable[[Path, Path], Tuple[bool, float]],
+    num_workers: int,
+) -> Tuple[int, List[Path], List[float], float]:
     """
-    Generic function to process multiple videos in parallel using any processing function.
-    
+    Process videos in parallel with progress tracking.
+
     Args:
-        input_paths: List of Path objects for input videos
-        output_dir: Output directory Path object
-        processing_func: Function that takes (input_path, output_path) and returns (success, input_path)
-        num_workers: Number of parallel processes
-        
+        input_paths: List of input video paths
+        output_dir: Output directory
+        processing_func: Function to process individual videos
+        num_workers: Number of parallel workers
+
     Returns:
-        Tuple (success_count, failed_paths)
+        Tuple (success_count, failed_paths, processing_times, total_time)
     """
-    # Create task list: (input_path, output_path)
-    tasks = []
-    for input_path in input_paths:
-        output_path = output_dir / f"{input_path.stem}_output{input_path.suffix}"
-        tasks.append((input_path, output_path))
-    
-    # Process videos in parallel
+    start_time = time.time()
+    tasks = [(ip, output_dir / f"{ip.stem}_output{ip.suffix}") for ip in input_paths]
+
+    success_count = 0
+    failed_paths = []
+    processing_times = []
+
+    # Create a helper function for progress tracking
+    def process_task_wrapper(task: Tuple[Path, Path]) -> Tuple[bool, Path, float]:
+        input_path, output_path = task
+        prefix = f"{tasks.index(task)+1}/{len(tasks)}"
+        logger.log(f"Starting: {input_path.name}", prefix)
+        success, ptime = processing_func(input_path, output_path)
+        status = "Success" if success else "Failed"
+        logger.log(f"Completed: {status} in {ptime:.1f}s", prefix)
+        return success, input_path, ptime
+
     with Pool(processes=num_workers) as pool:
-        results = pool.map(processing_func, tasks)
-    
-    # Calculate results
-    success_count = sum(1 for status, _ in results if status)
-    failed_paths = [path for status, path in results if not status]
-    
-    return success_count, failed_paths
+        results = []
+        total = len(tasks)
+
+        # Process tasks as they complete
+        for i, result in enumerate(pool.imap_unordered(process_task_wrapper, tasks)):
+            success, path, ptime = result
+            results.append(result)
+            processing_times.append(ptime)
+
+            if success:
+                success_count += 1
+            else:
+                failed_paths.append(path)
+
+            # Print progress
+            progress = (i + 1) / total * 100
+            logger.log(f"Overall progress: {i+1}/{total} ({progress:.1f}%)", "MAIN")
+
+    total_time = time.time() - start_time
+    return success_count, failed_paths, processing_times, total_time

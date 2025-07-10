@@ -1,54 +1,55 @@
 import sys
-sys.path.append("/home/allen-ubuntu-vm1/GitClone/python-ffmpeg")
-sys.path.append("/home/allen-ubuntu-vm1/GitClone/own_function")
-from own_function import filter_files_by_extension, list_files_by_depth
 
-from downsampling import downsample_video
-from multi_process_videos import multi_process_videos
+sys.path.append("/home/userroot/GitClone/python-ffmpeg")
+sys.path.append("/home/userroot/GitClone/own_function")
+from .own_function import filter_files_by_extension, list_files_by_depth
+
+from .downsampling import downsample_video
+from .multi_process_videos import multi_process_videos
 from multiprocessing import cpu_count
 from typing import List, Tuple
 from pathlib import Path
 import argparse
+from .logger import logger
 
 
-def print_summary(success_count: int, total: int, failed_paths: List[Path]):
+def print_summary(
+    success_count: int,
+    total: int,
+    failed_paths: List[Path],
+    processing_times: List[float],
+    total_time: float,
+):
     """Print processing summary"""
-    print(f"\nProcessing complete: {success_count}/{total} videos succeeded")
+    avg_time = sum(processing_times) / total if total else 0
+    min_time = min(processing_times) if processing_times else 0
+    max_time = max(processing_times) if processing_times else 0
+
+    logger.log("\n" + "=" * 60, None)
+    logger.log("PROCESSING SUMMARY", None)
+    logger.log("=" * 60, None)
+    logger.log(f"Total Videos:      {total}", None)
+    logger.log(
+        f"Successful:        {success_count} ({success_count/total*100:.1f}%)", None
+    )
+    logger.log(f"Failed:            {len(failed_paths)}", None)
+    logger.log(f"Total Time:        {total_time:.1f} seconds", None)
+    logger.log(f"Avg Time/Video:    {avg_time:.1f} seconds", None)
+    logger.log(f"Fastest Video:     {min_time:.1f} seconds", None)
+    logger.log(f"Slowest Video:     {max_time:.1f} seconds", None)
+
     if failed_paths:
-        print("\nFailed files:")
+        logger.log("\nFAILED FILES:", None)
         for path in failed_paths:
-            print(f" - {path}")
+            logger.log(f" - {path}", None)
+
+    logger.log("\nPROCESSING TIMES:", None)
+    for i, time_val in enumerate(sorted(processing_times, reverse=True)):
+        logger.log(f"{i+1:2d}. {time_val:6.1f}s", None)
+    logger.log("=" * 60, None)
 
 
-# if __name__ == "__main__":
-#     print("start to convert...")
-#     target_ext = ".mp4"
-#     source_ext = ".mp4"
-#     level = 1
-
-#     input_directory = "/home/userroot/shizheng/photo"
-#     # sub_dir = "output"
-#     name_postfix = "_output"
-
-#     target_file_paths = target_file_path_with_level(input_directory, source_ext, level)
-
-#     count = 0
-
-#     for file_path in target_file_paths:
-#         file = Path(file_path)
-#         count += 1
-#         print(count)
-#         file_path = str(file.resolve())
-#         target_file = file.parent / (file.stem + name_postfix + target_ext)
-
-#         # # create output folder if it does not existed
-#         # target_file.parent.mkdir(mode=755, parents=True, exist_ok=True)
-
-#         target_file_path = str(target_file.resolve())
-
-#         downsample_video(file_path, target_file_path)
-
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="Video Downsampling Tool")
     parser.add_argument(
         "--input", required=True, nargs="+", help="Input file(s) or directory(ies)"
@@ -57,8 +58,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--workers",
         type=int,
-        default=cpu_count(),
-        help=f"Number of parallel workers (default: {cpu_count()})",
+        default=2,
+        help=f"Number of parallel workers (default: 2)",
     )
     parser.add_argument(
         "--max_depth",
@@ -81,19 +82,23 @@ if __name__ == "__main__":
         input_files = filter_files_by_extension(files, video_exts)
 
     output_dir = Path(args.output)
-
-    print(f"Using {args.workers} parallel workers")
-
-    # Ensure output directory exists
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Process videos with generic function
-    success_count, failed_paths = multi_process_videos(
+    num_workers = min(args.workers, len(input_files))
+    logger.log(f"Found {len(input_files)} videos for processing", "MAIN")
+    logger.log(f"Using {num_workers} workers", "MAIN")
+
+    # Process videos
+    success_count, failed_paths, proc_times, total_time = multi_process_videos(
         input_paths=input_files,
         output_dir=output_dir,
         processing_func=downsample_video,
-        num_workers=min(args.workers, len(input_files)),
+        num_workers=num_workers,
     )
 
     # Print summary
-    print_summary(success_count, len(input_files), failed_paths)
+    print_summary(success_count, len(input_files), failed_paths, proc_times, total_time)
+
+
+if __name__ == "__main__":
+    main()
