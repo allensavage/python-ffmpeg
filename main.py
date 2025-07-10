@@ -1,15 +1,15 @@
 import sys
 
 sys.path.append("/home/userroot/GitClone/own_function")
-from .own_function import filter_files_by_extension, list_files_by_depth
+from own_function import filter_files_by_extension, list_files_by_depth  # type: ignore
 
-from .downsampling import downsample_video
-from .multi_process_videos import multi_process_videos
+from downsampling import downsample_video
+from multi_process_videos import multi_process_videos
 from multiprocessing import cpu_count
 from typing import List, Tuple
 from pathlib import Path
 import argparse
-from .logger import logger
+from logger import logger
 
 
 def print_summary(

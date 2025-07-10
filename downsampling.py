@@ -2,7 +2,7 @@ import subprocess
 from typing import Tuple
 from pathlib import Path
 import time
-from .logger import logger  # Import the global logger
+from logger import logger  # Import the global logger
 
 
 def downsample_video(input_path: Path, output_path: Path) -> Tuple[bool, float]:
